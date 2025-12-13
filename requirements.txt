@@ -4,3 +4,4 @@ scikit-learn
 pandas
 transformers
 openpyxl
+tf-keras
