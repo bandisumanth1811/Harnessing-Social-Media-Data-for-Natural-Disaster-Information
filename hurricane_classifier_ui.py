@@ -9,18 +9,18 @@ import pickle
 @st.cache_resource
 def load_stage1_model():
     model = BertForSequenceClassification.from_pretrained(
-        "saved_models/stage1_info_model", from_tf=True  # TF weights → PyTorch
+        "saved_models/stage1_info_model", from_tf=True
     )
-    tokenizer = BertTokenizer.from_pretrained("saved_models/stage1_info_model")
-    return model, tokenizer
+    model.eval()  # set to eval mode
+    return model, BertTokenizer.from_pretrained("saved_models/stage1_info_model")
 
 @st.cache_resource
 def load_stage2_model():
     model = BertForSequenceClassification.from_pretrained(
-        "saved_models/stage2_category_model", from_tf=True  # TF weights → PyTorch
+        "saved_models/stage2_category_model", from_tf=True
     )
-    tokenizer = BertTokenizer.from_pretrained("saved_models/stage2_category_model")
-    return model, tokenizer
+    model.eval()  # set to eval mode
+    return model, BertTokenizer.from_pretrained("saved_models/stage2_category_model")
 
 @st.cache_resource
 def load_label_encoder():
@@ -43,7 +43,10 @@ if st.button("🔍 Classify Tweet"):
     else:
         try:
             # ---- Stage 1: Info vs Not ---- #
-            inputs_info = tokenizer_info(tweet, return_tensors='pt', truncation=True, padding=True)
+            inputs_info = tokenizer_info(
+                tweet, return_tensors='pt', truncation=True,
+                padding=True, max_length=128
+            )
             with torch.no_grad():
                 outputs_info = model_info(**inputs_info)
             pred_info = torch.argmax(outputs_info.logits, dim=1).item()
@@ -52,7 +55,10 @@ if st.button("🔍 Classify Tweet"):
 
             # ---- Stage 2: Info Category ---- #
             if pred_info == 1:
-                inputs_cat = tokenizer_cat(tweet, return_tensors='pt', truncation=True, padding=True)
+                inputs_cat = tokenizer_cat(
+                    tweet, return_tensors='pt', truncation=True,
+                    padding=True, max_length=128
+                )
                 with torch.no_grad():
                     outputs_cat = model_cat(**inputs_cat)
                 pred_cat = torch.argmax(outputs_cat.logits, dim=1).item()
