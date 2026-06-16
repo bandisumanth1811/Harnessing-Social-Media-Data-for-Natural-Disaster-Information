@@ -1,22 +1,20 @@
 import streamlit as st
-
-# MUST be the first Streamlit command
 st.set_page_config(page_title="Hurricane Tweet Classifier", layout="centered")
 
-from transformers import BertTokenizer, TFBertForSequenceClassification
-import tensorflow as tf
+from transformers import BertTokenizer, BertForSequenceClassification
+import torch
 import pickle
 
 # -------- Load Models and Tokenizers -------- #
 @st.cache_resource
 def load_stage1_model():
-    model = TFBertForSequenceClassification.from_pretrained("saved_models/stage1_info_model")
+    model = BertForSequenceClassification.from_pretrained("saved_models/stage1_info_model")
     tokenizer = BertTokenizer.from_pretrained("saved_models/stage1_info_model")
     return model, tokenizer
 
 @st.cache_resource
 def load_stage2_model():
-    model = TFBertForSequenceClassification.from_pretrained("saved_models/stage2_category_model")
+    model = BertForSequenceClassification.from_pretrained("saved_models/stage2_category_model")  # fixed
     tokenizer = BertTokenizer.from_pretrained("saved_models/stage2_category_model")
     return model, tokenizer
 
@@ -41,20 +39,20 @@ if st.button("🔍 Classify Tweet"):
     else:
         try:
             # ---- Stage 1: Info vs Not ---- #
-            inputs_info = tokenizer_info(tweet, return_tensors='tf', truncation=True, padding=True)
-            outputs_info = model_info(inputs_info)
-            pred_info = tf.argmax(outputs_info.logits, axis=1).numpy()[0]
-
+            inputs_info = tokenizer_info(tweet, return_tensors='pt', truncation=True, padding=True)  # fixed
+            with torch.no_grad():  # fixed
+                outputs_info = model_info(**inputs_info)  # fixed
+            pred_info = torch.argmax(outputs_info.logits, dim=1).item()  # fixed
             info_label = "Information" if pred_info == 1 else "Not Information"
             st.markdown(f"### 🧾 Informational Check: `{info_label}`")
 
             # ---- Stage 2: Info Category ---- #
             if pred_info == 1:
-                inputs_cat = tokenizer_cat(tweet, return_tensors='tf', truncation=True, padding=True)
-                outputs_cat = model_cat(inputs_cat)
-                pred_cat = tf.argmax(outputs_cat.logits, axis=1).numpy()[0]
+                inputs_cat = tokenizer_cat(tweet, return_tensors='pt', truncation=True, padding=True)  # fixed
+                with torch.no_grad():  # fixed
+                    outputs_cat = model_cat(**inputs_cat)  # fixed
+                pred_cat = torch.argmax(outputs_cat.logits, dim=1).item()  # fixed
                 category = label_encoder.inverse_transform([pred_cat])[0]
-
                 st.markdown(f"### 🏷️ Information Category:\n**`{category}`**")
 
         except Exception as e:
