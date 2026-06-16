@@ -4,3 +4,4 @@ transformers
 scikit-learn
 pandas
 openpyxl
+torchvision
