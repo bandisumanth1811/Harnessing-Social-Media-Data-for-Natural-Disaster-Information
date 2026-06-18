@@ -9,7 +9,7 @@ import pickle
 @st.cache_resource
 def load_stage1_model():
     model = BertForSequenceClassification.from_pretrained(
-        "saved_models/stage1_info_model", from_tf=True
+        "saved_models/stage1_info_model"
     )
     model.eval()  # set to eval mode
     return model, BertTokenizer.from_pretrained("saved_models/stage1_info_model")
@@ -17,7 +17,7 @@ def load_stage1_model():
 @st.cache_resource
 def load_stage2_model():
     model = BertForSequenceClassification.from_pretrained(
-        "saved_models/stage2_category_model", from_tf=True
+        "saved_models/stage2_category_model"
     )
     model.eval()  # set to eval mode
     return model, BertTokenizer.from_pretrained("saved_models/stage2_category_model")

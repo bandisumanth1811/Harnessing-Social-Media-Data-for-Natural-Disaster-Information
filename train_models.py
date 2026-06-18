@@ -37,6 +37,12 @@ model1.fit(train_ds1, validation_data=val_ds1, epochs=3)
 model1.save_pretrained("saved_models/stage1_info_model")
 tokenizer1.save_pretrained("saved_models/stage1_info_model")
 
+# Convert and save in PyTorch format
+from transformers import BertForSequenceClassification
+print("🔄 Converting Stage 1 model to PyTorch format...")
+pt_model1 = BertForSequenceClassification.from_pretrained("saved_models/stage1_info_model", from_tf=True)
+pt_model1.save_pretrained("saved_models/stage1_info_model")
+
 print("✅ Stage 1 model saved.")
 
 # ================== STAGE 2: Multi-class Info Category ================== #
@@ -67,6 +73,12 @@ model2.compile(optimizer=tf.keras.optimizers.Adam(5e-5),
 model2.fit(train_ds2, validation_data=val_ds2, epochs=3)
 model2.save_pretrained("saved_models/stage2_category_model")
 tokenizer2.save_pretrained("saved_models/stage2_category_model")
+
+# Convert and save in PyTorch format
+from transformers import BertForSequenceClassification
+print("🔄 Converting Stage 2 model to PyTorch format...")
+pt_model2 = BertForSequenceClassification.from_pretrained("saved_models/stage2_category_model", from_tf=True)
+pt_model2.save_pretrained("saved_models/stage2_category_model")
 
 with open("saved_models/stage2_label_encoder.pkl", "wb") as f:
     pickle.dump(label_encoder, f)
